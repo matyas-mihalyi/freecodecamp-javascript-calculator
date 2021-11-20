@@ -5,11 +5,11 @@ export const useInput = () => {
 
   const [input, setInput] = useState<string>("0");
 
-  const [result, setResult] = useState<string>("") //ez lehet az Appba kell
+  const [result, setResult] = useState<string>("");
+
 
 
   function updateInput (char:string) {
-    //ha a result nem "", bármi lehet az első érték
     const inputArr = Array.from(input);
     const lastChar = inputArr[inputArr.length - 1];
     const beforeLastChar = inputArr[inputArr.length - 2];
@@ -23,10 +23,17 @@ export const useInput = () => {
       secondDot: (char === "." && /\d+\.\d+$/.test(input)),
       noOperator:(/^\d+[+\-*/]?$/.test(input)),
       noPrevoiusResult:(result === ""),
-      twoOperatorsAtEnd: (isOperator(lastChar) && isOperator(beforeLastChar) && isOperator(char))
+      twoOperatorsAtEnd: (isOperator(lastChar) && isOperator(beforeLastChar) && isOperator(char)),
+      numAfterCalc: (input === result && isNumber(char))
     };
     
     if(cases.secondDot) {
+      return
+    }
+
+    if (cases.numAfterCalc) {
+      setResult("");
+      setInput(char);
       return
     }
    
@@ -74,17 +81,19 @@ export const useInput = () => {
     }
   }
 
-  const operators:any = {
-    '+': function(a:number, b:number) { return a + b },
-    '-': function(a:number, b:number) { return a - b },
-    '*': function(a:number, b:number) { return a * b },
-    '/': function(a:number, b:number) { return a / b }
+  type Operation = (a:number, b: number) => number
+  type Operators={
+    [propName: string]:Operation;
+  }
+  const operators:Operators = {
+    '+': function(a, b) { return a + b },
+    '-': function(a, b) { return a - b },
+    '*': function(a, b) { return a * b },
+    '/': function(a, b) { return a / b }
   };
 
   function calculate (input:string) {
-    //ha result nem üres és az első char egy operator unshiftelje resultot az array elejére
-
-    //legalább 4 decimal places
+ 
     //https://expertcodeblog.wordpress.com/2018/02/12/typescript-javascript-round-number-by-decimal-pecision/
     function precisionRound(number: number, precision: number)
       {
@@ -99,35 +108,43 @@ export const useInput = () => {
       }
 
 
-    const arr = input.split(/([^\d])/).filter(item => item !== "");
+    const arr = input.split(/([^\d\.?])/).filter(item => item !== "");
     
     if (Object.keys(operators).some(op => op === arr[0]) && result !== "") {
       arr.unshift(result);
     }
     // console.log(`arr is ${arr}`)
 
-    function calc (arr:any) {
+    function calc (arr:string[]) {
       while (arr.some((e:string) => Object.keys(operators).some(op => op === e))) {
         // console.log(`arr is ${arr} at while loop beginning`)
         
-        const opindex = arr.indexOf(arr.find((e:string) => Object.keys(operators).some(op => op === e)));
-        // console.log(`opindex is ${opindex}`)
+        //find next operator in input string
+        const opindex = arr.indexOf(arr.find((e:string) => Object.keys(operators).some(op => op === e))!);
+        // console.log(`opindex is ${opindex}`);
         
-        //ha negatív a következő szám
+        //if next operator is the last character in the input, ignore it
+        if (opindex === 1 && arr.length === 2) {
+          break
+        }
+        
+
+        //if next number is positive
         if (arr[opindex+1] === "-") {
           // console.log(`next number is negative`)
           
-          const num:number = operators[arr[opindex]](parseFloat(arr[opindex-1]), parseFloat(arr[opindex+1]) * (-1));
-          // console.log(`num is ${num}`)
+          const num = operators[arr[opindex]](parseFloat(arr[opindex-1]), parseFloat(arr[opindex+2]) * (-1)).toString();
+          console.log(`num is ${num}`)
           
           arr.splice(0,4);
           // console.log(`arr is ${arr} after splicing`)
           
           arr.unshift(num);
           // console.log(`arr is ${arr} after unshift`)
+        //if next number is positive
         } else {
           // console.log(`next number is positive`)
-          const num:number = operators[arr[opindex]](parseFloat(arr[opindex-1]), parseFloat(arr[opindex+1]));
+          const num = operators[arr[opindex]](parseFloat(arr[opindex-1]), parseFloat(arr[opindex+1])).toString();
           // console.log(`num is ${num}`)
           
           arr.splice(0,3);
@@ -139,14 +156,16 @@ export const useInput = () => {
         
       } 
         return Number.isInteger(Number(arr[0])) ?
-          arr[0] 
+          arr[0].toString() 
           :
-          precisionRound(arr[0], 5)
+          precisionRound(Number(arr[0]), 5).toString();
         ;
       } 
-    console.log(`end of calculation is ${calc(arr)}`)
+    // console.log(`end of calculation is ${calc(arr)}`)
+    // console.log(`end of calculation is ${calc(arr)}`)
     setResult(calc(arr));
-    setInput("");
+    console.log(input)
+    setInput(calc(arr));
   }
 
   function calculateResult() {

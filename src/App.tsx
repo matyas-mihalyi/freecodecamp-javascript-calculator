@@ -11,10 +11,10 @@ function App() {
 
   return (
     <div className="row align-items-center justify-content-center min-vh-100">
-      <div className="calculator-wrapper col-4 rounded d-flex flex-column pt-3 pb-4 px-3">
+      <div className="calculator-wrapper col-xs-10 col-sm-8 col-lg-6 col-xl-3 rounded d-flex flex-column pt-3 pb-4 px-3">
         {/* DISPLAY */}
-          <div id="display-wrapper" className="my-2">
-            <div id="display">{input}</div>
+          <div id="display-wrapper" className="my-2 mx-3">
+            <div id="display" className="p-2">{input}</div>
             <span id="prev-value">{result}</span>
           </div>
         {/* DISPLAY */}

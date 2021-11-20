@@ -1,6 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+#root {
+  font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+  background-image: radial-gradient(#64a07d,#8ee7b3);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .calculator-wrapper {
   background-color: #deec5d;
   height: 60vh;
+  max-width: 450px;
 }
 
 #display-wrapper {
@@ -11,19 +20,26 @@
 
 #display{
   height: 100%;
+  font-size: 3rem;
+  text-align: right;
+  color: #1b1a1a;
 }
 
 #prev-value{
   position: absolute;
+  top: 0;
+  right: 1rem;
+  color: #333;
+  font-weight: 700;
 }
-
-/* #keypad-wrapper{
-  flex: 1 !important;
-} */
 
 .calc-btn {
   background-color: #1b1a1a;
   color: #f1f1f1;
+}
+
+.op-btn {
+  background-color: rgb(59, 8, 243);
 }
 
 .reset-btn {
